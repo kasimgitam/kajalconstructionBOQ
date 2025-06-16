@@ -1,0 +1,2617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KC | Premium Construction Estimation Suite</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0a0a2a;
+            --secondary: #c0a062;
+            --accent: #d4af37;
+            --light: #f8f5f0;
+            --dark: #050515;
+            --success: #4caf50;
+            --warning: #ffab00;
+            --text: #333333;
+            --text-light: #666666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background-color: #fafafa;
+            color: var(--text);
+            line-height: 1.7;
+            background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=10');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-blend-mode: overlay;
+            background-color: rgba(255,255,255,0.95);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: white;
+            padding: 30px 0;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 2.5rem;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.5);
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .logo-main {
+            font-size: 2.8rem;
+            line-height: 1;
+        }
+        
+        .logo-sub {
+            font-size: 1rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .since {
+            background: var(--accent);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: var(--dark);
+        }
+        
+        .units-toggle {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        
+        .units-toggle-btn {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            font-weight: 500;
+            color: var(--dark);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .units-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .units-toggle-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .tab-btn {
+            padding: 12px 25px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.95);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: var(--secondary);
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--secondary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        @media (max-width: 1200px) {
+            .calculator-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-section, .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            backdrop-filter: blur(5px);
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: var(--primary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 15px;
+            color: var(--secondary);
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.8);
+            color: var(--text);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(192, 160, 98, 0.2);
+            background: white;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 12px;
+            accent-color: var(--secondary);
+        }
+        
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+        
+        .element-list {
+            margin-bottom: 25px;
+        }
+        
+        .element-item {
+            background: rgba(248, 245, 240, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .element-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .element-item-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+            color: var(--dark);
+        }
+        
+        .btn-accent:hover {
+            background: #e1c46e;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(192, 160, 98, 0.1);
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--secondary);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--secondary);
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .result-details {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        
+        .result-details strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .material-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .material-table th, .material-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .material-table th {
+            background-color: var(--light);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .material-table tr:hover {
+            background-color: rgba(248, 245, 240, 0.3);
+        }
+        
+        .total-row {
+            font-weight: bold;
+            background-color: var(--light);
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .summary-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+        
+        .summary-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+        }
+        
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 25px 0;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: var(--accent);
+        }
+        
+        .summary-note {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            font-weight: 300;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        footer p {
+            margin-bottom: 10px;
+        }
+        
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .footer-logo-icon {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animated {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Print styles - Enhanced to show all necessary content */
+        @media print {
+            body, html {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 12pt;
+            }
+            
+            body * {
+                visibility: visible !important;
+            }
+            
+            .container {
+                max-width: 100% !important;
+                padding: 10px !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            
+            header {
+                background: var(--primary) !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 20px 0 !important;
+                margin-bottom: 20px !important;
+                break-inside: avoid;
+            }
+            
+            .calculator-container {
+                display: block !important;
+                grid-template-columns: none !important;
+                gap: 0 !important;
+                break-inside: avoid;
+            }
+            
+            .input-section {
+                display: none !important;
+            }
+            
+            .results-section {
+                box-shadow: none !important;
+                padding: 0 !important;
+                background: white !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid;
+            }
+            
+            .tabs, .units-toggle {
+                display: none !important;
+            }
+            
+            .tab-content {
+                display: block !important;
+                opacity: 1 !important;
+                animation: none !important;
+                page-break-inside: avoid;
+            }
+            
+            .btn {
+                display: none !important;
+            }
+            
+            .summary-card {
+                background: var(--primary) !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid;
+            }
+            
+            .result-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid;
+            }
+            
+            .element-item {
+                display: none !important;
+            }
+            
+            footer {
+                display: block !important;
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                border-radius: 0 !important;
+                padding: 15px !important;
+                break-inside: avoid;
+            }
+            
+            @page {
+                size: auto;
+                margin: 10mm;
+            }
+            
+            /* Show all results sections in print */
+            #slab-results, #beam-results, #column-results, #footing-results, #summary-results {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* Premium enhancements */
+        .premium-feature {
+            position: relative;
+        }
+        
+        .premium-feature::after {
+            content: "PREMIUM";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--accent);
+            color: var(--dark);
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .element-count-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .element-count-title {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .element-count-value {
+            font-weight: 700;
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+        
+        .element-add-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .element-add-btn:hover {
+            transform: scale(1.1);
+            background: #3d8b40;
+        }
+        
+        .element-remove-btn {
+            background: var(--accent);
+            color: var(--dark);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .element-remove-btn:hover {
+            transform: scale(1.1);
+            background: #e1c46e;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .calculator-container {
+                gap: 25px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .tab-btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+                min-width: auto;
+            }
+        }
+        
+        /* Print button styling */
+        .print-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .print-controls .btn {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .print-estimate-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .print-estimate-btn:hover {
+            background: var(--dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        
+        /* Download buttons */
+        .download-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .download-btn:hover {
+            background: #3d8b40;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        
+        /* Luxury logo enhancements */
+        .logo-badge {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo-badge::after {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo">
+                        <div class="logo-badge">
+                            <div class="logo-icon">KC</div>
+                        </div>
+                        <div class="logo-text">
+                            <span class="logo-main">Kajal Construction</span>
+                            <span class="logo-sub">Structural Engineers</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tagline">Luxury Structural Estimation Suite</div>
+                <div class="since">Since 2025</div>
+            </div>
+        </header>
+        
+        <div class="units-toggle">
+            <button class="units-toggle-btn active" data-unit="metric">Metric (m, mm)</button>
+            <button class="units-toggle-btn" data-unit="imperial">Imperial (ft, in)</button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="slab">Slabs</button>
+            <button class="tab-btn" data-tab="beam">Beams</button>
+            <button class="tab-btn" data-tab="column">Columns</button>
+            <button class="tab-btn" data-tab="footing">Footings</button>
+            <button class="tab-btn" data-tab="summary">Summary</button>
+        </div>
+        
+        <div class="calculator-container">
+            <div class="input-section">
+                <!-- Slab Tab -->
+                <div class="tab-content active" id="slab-tab">
+                    <div class="element-count-controls">
+                        <div>
+                            <div class="element-count-title">Slab Elements</div>
+                            <div class="element-count-value" id="slabCountDisplay">1</div>
+                        </div>
+                        <button class="element-add-btn" id="addSlabBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="element-list" id="slabList">
+                        <!-- Slab items will be added here -->
+                    </div>
+                    
+                    <template id="slabTemplate">
+                        <div class="element-item" data-id="0">
+                            <div class="element-item-header">
+                                <div class="element-item-title">Slab <span class="slab-number">1</span></div>
+                                <button class="element-remove-btn remove-slab">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="slabName_0">Name/Identifier</label>
+                                    <input type="text" id="slabName_0" value="Main Slab" class="slab-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="slabConcreteGrade_0">Concrete Grade</label>
+                                    <select id="slabConcreteGrade_0" class="slab-concrete-grade">
+                                        <option value="M20">M20</option>
+                                        <option value="M25" selected>M25</option>
+                                        <option value="M30">M30</option>
+                                        <option value="M35">M35</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="slabLength_0">Length (m)</label>
+                                    <input type="number" id="slabLength_0" value="5" step="0.1" min="1" class="slab-length">
+                                </div>
+                                <div class="form-group">
+                                    <label for="slabWidth_0">Width (m)</label>
+                                    <input type="number" id="slabWidth_0" value="4" step="0.1" min="1" class="slab-width">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="slabThickness_0">Thickness (m)</label>
+                                <input type="number" id="slabThickness_0" value="0.125" step="0.01" min="0.1" class="slab-thickness">
+                            </div>
+                            
+                            <h3 class="section-title"><i class="fas fa-grip-lines"></i> Reinforcement</h3>
+                            
+                            <div class="form-group">
+                                <label for="slabSteelGrade_0">Steel Grade</label>
+                                <select id="slabSteelGrade_0" class="slab-steel-grade">
+                                    <option value="Fe415">Fe415</option>
+                                    <option value="Fe500" selected>Fe500</option>
+                                    <option value="Fe550">Fe550</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="slabMainDia_0">Main Bars Dia (mm)</label>
+                                    <select id="slabMainDia_0" class="slab-main-dia">
+                                        <option value="8">8mm</option>
+                                        <option value="10" selected>10mm</option>
+                                        <option value="12">12mm</option>
+                                        <option value="16">16mm</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="slabMainSpacing_0">Spacing (mm)</label>
+                                    <input type="number" id="slabMainSpacing_0" value="150" min="75" step="25" class="slab-main-spacing">
+                                </div>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="slabMainCurtailment_0" class="slab-main-curtailment">
+                                <label for="slabMainCurtailment_0">Curtailment/Bend-up for Main Bars</label>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="slabDistDia_0">Distribution Bars Dia (mm)</label>
+                                    <select id="slabDistDia_0" class="slab-dist-dia">
+                                        <option value="8">8mm</option>
+                                        <option value="10" selected>10mm</option>
+                                        <option value="12">12mm</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="slabDistSpacing_0">Spacing (mm)</label>
+                                    <input type="number" id="slabDistSpacing_0" value="150" min="75" step="25" class="slab-dist-spacing">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="slabDevLength_0">Development Length (mm)</label>
+                                    <input type="number" id="slabDevLength_0" value="500" min="300" step="50" class="slab-dev-length">
+                                </div>
+                                <div class="form-group">
+                                    <label for="slabLapLength_0">Lap Length (mm)</label>
+                                    <input type="number" id="slabLapLength_0" value="600" min="400" step="50" class="slab-lap-length">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Beam Tab -->
+                <div class="tab-content" id="beam-tab">
+                    <div class="element-count-controls">
+                        <div>
+                            <div class="element-count-title">Beam Elements</div>
+                            <div class="element-count-value" id="beamCountDisplay">1</div>
+                        </div>
+                        <button class="element-add-btn" id="addBeamBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="element-list" id="beamList">
+                        <!-- Beam items will be added here -->
+                    </div>
+                    
+                    <template id="beamTemplate">
+                        <div class="element-item" data-id="0">
+                            <div class="element-item-header">
+                                <div class="element-item-title">Beam <span class="beam-number">1</span></div>
+                                <button class="element-remove-btn remove-beam">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamName_0">Name/Identifier</label>
+                                    <input type="text" id="beamName_0" value="Main Beam" class="beam-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="beamConcreteGrade_0">Concrete Grade</label>
+                                    <select id="beamConcreteGrade_0" class="beam-concrete-grade">
+                                        <option value="M20">M20</option>
+                                        <option value="M25" selected>M25</option>
+                                        <option value="M30">M30</option>
+                                        <option value="M35">M35</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="beamLength_0">Length (m)</label>
+                                <input type="number" id="beamLength_0" value="5" step="0.1" min="1" class="beam-length">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamWidth_0">Width (mm)</label>
+                                    <input type="number" id="beamWidth_0" value="230" min="150" step="10" class="beam-width">
+                                </div>
+                                <div class="form-group">
+                                    <label for="beamDepth_0">Depth (mm)</label>
+                                    <input type="number" id="beamDepth_0" value="450" min="200" step="10" class="beam-depth">
+                                </div>
+                            </div>
+                            
+                            <h3 class="section-title"><i class="fas fa-grip-lines"></i> Reinforcement</h3>
+                            
+                            <div class="form-group">
+                                <label for="beamSteelGrade_0">Steel Grade</label>
+                                <select id="beamSteelGrade_0" class="beam-steel-grade">
+                                    <option value="Fe415">Fe415</option>
+                                    <option value="Fe500" selected>Fe500</option>
+                                    <option value="Fe550">Fe550</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamTopBars_0">Top Bars (Nos)</label>
+                                    <input type="number" id="beamTopBars_0" value="3" min="2" max="6" class="beam-top-bars">
+                                </div>
+                                <div class="form-group">
+                                    <label for="beamTopDia_0">Dia (mm)</label>
+                                    <select id="beamTopDia_0" class="beam-top-dia">
+                                        <option value="10">10mm</option>
+                                        <option value="12" selected>12mm</option>
+                                        <option value="16">16mm</option>
+                                        <option value="20">20mm</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="beamTopCurtailment_0" class="beam-top-curtailment">
+                                <label for="beamTopCurtailment_0">Curtailment for Top Bars</label>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamBottomBars_0">Bottom Bars (Nos)</label>
+                                    <input type="number" id="beamBottomBars_0" value="3" min="2" max="6" class="beam-bottom-bars">
+                                </div>
+                                <div class="form-group">
+                                    <label for="beamBottomDia_0">Dia (mm)</label>
+                                    <select id="beamBottomDia_0" class="beam-bottom-dia">
+                                        <option value="10">10mm</option>
+                                        <option value="12">12mm</option>
+                                        <option value="16" selected>16mm</option>
+                                        <option value="20">20mm</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="beamBottomBendUp_0" class="beam-bottom-bend-up">
+                                <label for="beamBottomBendUp_0">Bend-up for Bottom Bars</label>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamStirrupDia_0">Stirrup Dia (mm)</label>
+                                    <select id="beamStirrupDia_0" class="beam-stirrup-dia">
+                                        <option value="6">6mm</option>
+                                        <option value="8" selected>8mm</option>
+                                        <option value="10">10mm</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamStirrupSpacingA_0">Zone A (Support) Spacing (mm)</label>
+                                    <input type="number" id="beamStirrupSpacingA_0" value="100" min="75" step="25" class="beam-stirrup-spacing-a">
+                                </div>
+                                <div class="form-group">
+                                    <label for="beamStirrupSpacingB_0">Zone B (Midspan) Spacing (mm)</label>
+                                    <input type="number" id="beamStirrupSpacingB_0" value="150" min="100" step="25" class="beam-stirrup-spacing-b">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="beamDevLength_0">Development Length (mm)</label>
+                                    <input type="number" id="beamDevLength_0" value="600" min="400" step="50" class="beam-dev-length">
+                                </div>
+                                <div class="form-group">
+                                    <label for="beamLapLength_0">Lap Length (mm)</label>
+                                    <input type="number" id="beamLapLength_0" value="750" min="500" step="50" class="beam-lap-length">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Column Tab -->
+                <div class="tab-content" id="column-tab">
+                    <div class="element-count-controls">
+                        <div>
+                            <div class="element-count-title">Column Elements</div>
+                            <div class="element-count-value" id="columnCountDisplay">1</div>
+                        </div>
+                        <button class="element-add-btn" id="addColumnBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="element-list" id="columnList">
+                        <!-- Column items will be added here -->
+                    </div>
+                    
+                    <template id="columnTemplate">
+                        <div class="element-item" data-id="0">
+                            <div class="element-item-header">
+                                <div class="element-item-title">Column <span class="column-number">1</span></div>
+                                <button class="element-remove-btn remove-column">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="columnName_0">Name/Identifier</label>
+                                    <input type="text" id="columnName_0" value="Main Column" class="column-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="columnConcreteGrade_0">Concrete Grade</label>
+                                    <select id="columnConcreteGrade_0" class="column-concrete-grade">
+                                        <option value="M25">M25</option>
+                                        <option value="M30" selected>M30</option>
+                                        <option value="M35">M35</option>
+                                        <option value="M40">M40</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="columnFloorHeight_0">Floor to Floor Height (m)</label>
+                                <input type="number" id="columnFloorHeight_0" value="3" step="0.1" min="2" class="column-floor-height">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="columnWidth_0">Width (mm)</label>
+                                    <input type="number" id="columnWidth_0" value="300" min="200" step="50" class="column-width">
+                                </div>
+                                <div class="form-group">
+                                    <label for="columnDepth_0">Depth (mm)</label>
+                                    <input type="number" id="columnDepth_0" value="300" min="200" step="50" class="column-depth">
+                                </div>
+                            </div>
+                            
+                            <h3 class="section-title"><i class="fas fa-grip-lines"></i> Reinforcement</h3>
+                            
+                            <div class="form-group">
+                                <label for="columnSteelGrade_0">Steel Grade</label>
+                                <select id="columnSteelGrade_0" class="column-steel-grade">
+                                    <option value="Fe415">Fe415</option>
+                                    <option value="Fe500" selected>Fe500</option>
+                                    <option value="Fe550">Fe550</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="columnBars_0">Number of Bars</label>
+                                    <input type="number" id="columnBars_0" value="8" min="4" max="12" class="column-bars">
+                                </div>
+                                <div class="form-group">
+                                    <label for="columnBarDia_0">Dia (mm)</label>
+                                    <select id="columnBarDia_0" class="column-bar-dia">
+                                        <option value="10">10mm</option>
+                                        <option value="12" selected>12mm</option>
+                                        <option value="16">16mm</option>
+                                        <option value="20">20mm</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="columnTieDia_0">Tie Dia (mm)</label>
+                                    <select id="columnTieDia_0" class="column-tie-dia">
+                                        <option value="6">6mm</option>
+                                        <option value="8" selected>8mm</option>
+                                        <option value="10">10mm</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="columnTieSpacingA_0">Zone A (Critical) Spacing (mm)</label>
+                                    <input type="number" id="columnTieSpacingA_0" value="100" min="75" step="25" class="column-tie-spacing-a">
+                                </div>
+                                <div class="form-group">
+                                    <label for="columnTieSpacingB_0">Zone B (Normal) Spacing (mm)</label>
+                                    <input type="number" id="columnTieSpacingB_0" value="150" min="100" step="25" class="column-tie-spacing-b">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="columnDevLength_0">Development Length (mm)</label>
+                                    <input type="number" id="columnDevLength_0" value="700" min="500" step="50" class="column-dev-length">
+                                </div>
+                                <div class="form-group">
+                                    <label for="columnLapLength_0">Lap Length (mm)</label>
+                                    <input type="number" id="columnLapLength_0" value="850" min="600" step="50" class="column-lap-length">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Footing Tab -->
+                <div class="tab-content" id="footing-tab">
+                    <div class="element-count-controls">
+                        <div>
+                            <div class="element-count-title">Footing Elements</div>
+                            <div class="element-count-value" id="footingCountDisplay">1</div>
+                        </div>
+                        <button class="element-add-btn" id="addFootingBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="element-list" id="footingList">
+                        <!-- Footing items will be added here -->
+                    </div>
+                    
+                    <template id="footingTemplate">
+                        <div class="element-item" data-id="0">
+                            <div class="element-item-header">
+                                <div class="element-item-title">Footing <span class="footing-number">1</span></div>
+                                <button class="element-remove-btn remove-footing">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="footingName_0">Name/Identifier</label>
+                                    <input type="text" id="footingName_0" value="Main Footing" class="footing-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="footingConcreteGrade_0">Concrete Grade</label>
+                                    <select id="footingConcreteGrade_0" class="footing-concrete-grade">
+                                        <option value="M15">M15</option>
+                                        <option value="M20" selected>M20</option>
+                                        <option value="M25">M25</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="footingLength_0">Length (m)</label>
+                                    <input type="number" id="footingLength_0" value="1.5" step="0.1" min="0.5" class="footing-length">
+                                </div>
+                                <div class="form-group">
+                                    <label for="footingWidth_0">Width (m)</label>
+                                    <input type="number" id="footingWidth_0" value="1.5" step="0.1" min="0.5" class="footing-width">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="footingThickness_0">Thickness (m)</label>
+                                <input type="number" id="footingThickness_0" value="0.3" step="0.05" min="0.2" class="footing-thickness">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="footingDepth_0">Depth Below GL (m)</label>
+                                <input type="number" id="footingDepth_0" value="1.5" step="0.1" min="0.5" class="footing-depth">
+                            </div>
+                            
+                            <h3 class="section-title"><i class="fas fa-grip-lines"></i> Reinforcement</h3>
+                            
+                            <div class="form-group">
+                                <label for="footingSteelGrade_0">Steel Grade</label>
+                                <select id="footingSteelGrade_0" class="footing-steel-grade">
+                                    <option value="Fe415">Fe415</option>
+                                    <option value="Fe500" selected>Fe500</option>
+                                </select>
+                            </div>
+                            
+                            <h4>Top Reinforcement</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="footingTopDia_0">Bars Dia (mm)</label>
+                                    <select id="footingTopDia_0" class="footing-top-dia">
+                                        <option value="8">8mm</option>
+                                        <option value="10" selected>10mm</option>
+                                        <option value="12">12mm</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="footingTopSpacing_0">Spacing (mm)</label>
+                                    <input type="number" id="footingTopSpacing_0" value="150" min="75" step="25" class="footing-top-spacing">
+                                </div>
+                            </div>
+                            
+                            <h4>Bottom Reinforcement</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="footingBottomDia_0">Bars Dia (mm)</label>
+                                    <select id="footingBottomDia_0" class="footing-bottom-dia">
+                                        <option value="8">8mm</option>
+                                        <option value="10" selected>10mm</option>
+                                        <option value="12">12mm</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="footingBottomSpacing_0">Spacing (mm)</label>
+                                    <input type="number" id="footingBottomSpacing_0" value="150" min="75" step="25" class="footing-bottom-spacing">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="footingDevLength_0">Development Length (mm)</label>
+                                    <input type="number" id="footingDevLength_0" value="500" min="300" step="50" class="footing-dev-length">
+                                </div>
+                                <div class="form-group">
+                                    <label for="footingLapLength_0">Lap Length (mm)</label>
+                                    <input type="number" id="footingLapLength_0" value="600" min="400" step="50" class="footing-lap-length">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Summary Tab -->
+                <div class="tab-content" id="summary-tab">
+                    <h2 class="section-title"><i class="fas fa-calculator"></i> Material Rates</h2>
+                    
+                    <div class="form-group">
+                        <label for="cementRate">Cement Rate (per 50kg bag)</label>
+                        <input type="number" id="cementRate" value="400" min="100" step="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sandRate">Sand Rate (per m³)</label>
+                        <input type="number" id="sandRate" value="800" min="100" step="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="aggregateRate">Aggregate Rate (per m³)</label>
+                        <input type="number" id="aggregateRate" value="1000" min="100" step="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="steelRate">Steel Rate (per kg)</label>
+                        <input type="number" id="steelRate" value="70" min="30" step="5">
+                    </div>
+                    
+                    <div class="print-controls">
+                        <button id="calculateBtn" class="btn">Calculate All Quantities</button>
+                        <button id="resetBtn" class="btn btn-accent">Reset All Values</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-section" id="resultsSection">
+                <div class="tab-content active" id="slab-results">
+                    <h2 class="section-title"><i class="fas fa-border-style"></i> Slab Estimation</h2>
+                    <div id="slabResultsContainer">
+                        <!-- Slab results will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="beam-results">
+                    <h2 class="section-title"><i class="fas fa-ruler-combined"></i> Beam Estimation</h2>
+                    <div id="beamResultsContainer">
+                        <!-- Beam results will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="column-results">
+                    <h2 class="section-title"><i class="fas fa-columns"></i> Column Estimation</h2>
+                    <div id="columnResultsContainer">
+                        <!-- Column results will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="footing-results">
+                    <h2 class="section-title"><i class="fas fa-layer-group"></i> Footing Estimation</h2>
+                    <div id="footingResultsContainer">
+                        <!-- Footing results will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="summary-results">
+                    <h2 class="section-title"><i class="fas fa-file-invoice-dollar"></i> Cost Summary</h2>
+                    
+                    <div class="result-card animated">
+                        <div class="result-title">
+                            <span>Total Concrete Volume</span>
+                            <span class="result-value" id="totalConcreteVol">0 m³</span>
+                        </div>
+                        <div class="result-details">
+                            Includes all structural elements
+                        </div>
+                    </div>
+                    
+                    <div class="result-card animated" style="animation-delay: 0.1s;">
+                        <div class="result-title">
+                            <span>Total Steel Weight</span>
+                            <span class="result-value" id="totalSteelWeight">0 kg</span>
+                        </div>
+                        <div class="result-details">
+                            Includes all reinforcement
+                        </div>
+                    </div>
+                    
+                    <table class="material-table">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Quantity</th>
+                                <th>Unit Cost</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="costBreakdown">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="3">Total Estimated Cost</td>
+                                <td id="totalCost">₹0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <div class="summary-card animated" style="animation-delay: 0.3s;">
+                        <h3 class="summary-title">Project Cost Summary</h3>
+                        <div class="summary-value" id="projectTotal">₹0</div>
+                        <p class="summary-note">
+                            Note: This estimate includes material costs only. Labor, equipment and overheads are not included.
+                        </p>
+                    </div>
+                    
+                    <div class="print-controls">
+                        <button id="printBtn" class="print-estimate-btn">
+                            <i class="fas fa-print"></i> Print Professional Estimate
+                        </button>
+                        <button id="downloadPdfBtn" class="download-btn">
+                            <i class="fas fa-file-pdf"></i> Download as PDF
+                        </button>
+                        <button id="downloadExcelBtn" class="download-btn">
+                            <i class="fas fa-file-excel"></i> Download as Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-logo">
+                <span class="footer-logo-icon">KC</span>
+                <span>Kajal Construction</span>
+            </div>
+            <p>© 2025 Kajal Construction. All Rights Reserved.</p>
+            <p>Luxury Construction Solutions Since 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Steel density (kg/m³)
+            const steelDensity = 7850;
+            
+            // Unit conversion flag
+            let isMetric = true;
+            
+            // Element counters
+            let slabCount = 1;
+            let beamCount = 1;
+            let columnCount = 1;
+            let footingCount = 1;
+            
+            // DOM elements
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const unitToggleBtns = document.querySelectorAll('.units-toggle-btn');
+            
+            // Initialize with one element of each type
+            addSlabElement();
+            addBeamElement();
+            addColumnElement();
+            addFootingElement();
+            
+            // Toggle units
+            unitToggleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const unit = this.getAttribute('data-unit');
+                    isMetric = (unit === 'metric');
+                    
+                    unitToggleBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Recalculate with current values
+                    calculateAll();
+                });
+            });
+            
+            // Tab functionality
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update active tab content
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    document.getElementById(`${tabId}-results`).classList.add('active');
+                });
+            });
+            
+            // Add element buttons
+            document.getElementById('addSlabBtn').addEventListener('click', addSlabElement);
+            document.getElementById('addBeamBtn').addEventListener('click', addBeamElement);
+            document.getElementById('addColumnBtn').addEventListener('click', addColumnElement);
+            document.getElementById('addFootingBtn').addEventListener('click', addFootingElement);
+            
+            // Calculate button
+            const calculateBtn = document.getElementById('calculateBtn');
+            calculateBtn.addEventListener('click', calculateAll);
+            
+            // Reset button
+            const resetBtn = document.getElementById('resetBtn');
+            resetBtn.addEventListener('click', resetAll);
+            
+            // Print button
+            const printBtn = document.getElementById('printBtn');
+            printBtn.addEventListener('click', printEstimate);
+            
+            // Download PDF button
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            downloadPdfBtn.addEventListener('click', downloadAsPdf);
+            
+            // Download Excel button
+            const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+            downloadExcelBtn.addEventListener('click', downloadAsExcel);
+            
+            // Convert units for display
+            function convertForDisplay(value, isLength = true) {
+                if (isMetric) return value;
+                
+                if (isLength) {
+                    // Convert meters to feet
+                    if (value >= 1) return math.round(value * 3.28084, 2) + ' ft';
+                    // Convert mm to inches
+                    return math.round(value * 0.0393701, 1) + ' in';
+                } else {
+                    // Convert m³ to ft³
+                    return math.round(value * 35.3147, 2) + ' ft³';
+                }
+            }
+            
+            // Convert input values from imperial to metric
+            function convertInputToMetric(value, isLength = true) {
+                if (isMetric) return value;
+                
+                if (isLength) {
+                    // Convert feet to meters or inches to mm
+                    return (value >= 1) ? value / 3.28084 : value / 0.0393701;
+                } else {
+                    // Convert ft³ to m³
+                    return value / 35.3147;
+                }
+            }
+            
+            // Add slab element
+            function addSlabElement() {
+                const template = document.getElementById('slabTemplate');
+                const clone = template.content.cloneNode(true);
+                const newId = slabCount;
+                
+                // Update IDs and names
+                clone.querySelector('.element-item').dataset.id = newId;
+                clone.querySelector('.slab-number').textContent = newId;
+                
+                // Update all input IDs
+                const inputs = clone.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const oldId = input.id;
+                    input.id = oldId.replace('_0', `_${newId}`);
+                });
+                
+                // Update labels
+                const labels = clone.querySelectorAll('label');
+                labels.forEach(label => {
+                    if (label.htmlFor) {
+                        label.htmlFor = label.htmlFor.replace('_0', `_${newId}`);
+                    }
+                });
+                
+                // Add remove event
+                clone.querySelector('.remove-slab').addEventListener('click', function() {
+                    if (slabCount > 1) {
+                        this.closest('.element-item').remove();
+                        slabCount--;
+                        document.getElementById('slabCountDisplay').textContent = slabCount;
+                    } else {
+                        alert('You must have at least one slab element');
+                    }
+                });
+                
+                // Append to list
+                document.getElementById('slabList').appendChild(clone);
+                slabCount++;
+                document.getElementById('slabCountDisplay').textContent = slabCount;
+            }
+            
+            // Add beam element
+            function addBeamElement() {
+                const template = document.getElementById('beamTemplate');
+                const clone = template.content.cloneNode(true);
+                const newId = beamCount;
+                
+                // Update IDs and names
+                clone.querySelector('.element-item').dataset.id = newId;
+                clone.querySelector('.beam-number').textContent = newId;
+                
+                // Update all input IDs
+                const inputs = clone.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const oldId = input.id;
+                    input.id = oldId.replace('_0', `_${newId}`);
+                });
+                
+                // Update labels
+                const labels = clone.querySelectorAll('label');
+                labels.forEach(label => {
+                    if (label.htmlFor) {
+                        label.htmlFor = label.htmlFor.replace('_0', `_${newId}`);
+                    }
+                });
+                
+                // Add remove event
+                clone.querySelector('.remove-beam').addEventListener('click', function() {
+                    if (beamCount > 1) {
+                        this.closest('.element-item').remove();
+                        beamCount--;
+                        document.getElementById('beamCountDisplay').textContent = beamCount;
+                    } else {
+                        alert('You must have at least one beam element');
+                    }
+                });
+                
+                // Append to list
+                document.getElementById('beamList').appendChild(clone);
+                beamCount++;
+                document.getElementById('beamCountDisplay').textContent = beamCount;
+            }
+            
+            // Add column element
+            function addColumnElement() {
+                const template = document.getElementById('columnTemplate');
+                const clone = template.content.cloneNode(true);
+                const newId = columnCount;
+                
+                // Update IDs and names
+                clone.querySelector('.element-item').dataset.id = newId;
+                clone.querySelector('.column-number').textContent = newId;
+                
+                // Update all input IDs
+                const inputs = clone.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const oldId = input.id;
+                    input.id = oldId.replace('_0', `_${newId}`);
+                });
+                
+                // Update labels
+                const labels = clone.querySelectorAll('label');
+                labels.forEach(label => {
+                    if (label.htmlFor) {
+                        label.htmlFor = label.htmlFor.replace('_0', `_${newId}`);
+                    }
+                });
+                
+                // Add remove event
+                clone.querySelector('.remove-column').addEventListener('click', function() {
+                    if (columnCount > 1) {
+                        this.closest('.element-item').remove();
+                        columnCount--;
+                        document.getElementById('columnCountDisplay').textContent = columnCount;
+                    } else {
+                        alert('You must have at least one column element');
+                    }
+                });
+                
+                // Append to list
+                document.getElementById('columnList').appendChild(clone);
+                columnCount++;
+                document.getElementById('columnCountDisplay').textContent = columnCount;
+            }
+            
+            // Add footing element
+            function addFootingElement() {
+                const template = document.getElementById('footingTemplate');
+                const clone = template.content.cloneNode(true);
+                const newId = footingCount;
+                
+                // Update IDs and names
+                clone.querySelector('.element-item').dataset.id = newId;
+                clone.querySelector('.footing-number').textContent = newId;
+                
+                // Update all input IDs
+                const inputs = clone.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const oldId = input.id;
+                    input.id = oldId.replace('_0', `_${newId}`);
+                });
+                
+                // Update labels
+                const labels = clone.querySelectorAll('label');
+                labels.forEach(label => {
+                    if (label.htmlFor) {
+                        label.htmlFor = label.htmlFor.replace('_0', `_${newId}`);
+                    }
+                });
+                
+                // Add remove event
+                clone.querySelector('.remove-footing').addEventListener('click', function() {
+                    if (footingCount > 1) {
+                        this.closest('.element-item').remove();
+                        footingCount--;
+                        document.getElementById('footingCountDisplay').textContent = footingCount;
+                    } else {
+                        alert('You must have at least one footing element');
+                    }
+                });
+                
+                // Append to list
+                document.getElementById('footingList').appendChild(clone);
+                footingCount++;
+                document.getElementById('footingCountDisplay').textContent = footingCount;
+            }
+            
+            // Calculate all quantities
+            function calculateAll() {
+                const slabResults = calculateAllSlabs();
+                const beamResults = calculateAllBeams();
+                const columnResults = calculateAllColumns();
+                const footingResults = calculateAllFootings();
+                calculateSummary(slabResults, beamResults, columnResults, footingResults);
+                
+                // Show results section if hidden
+                document.getElementById('resultsSection').style.display = 'block';
+            }
+            
+            // Calculate all slabs
+            function calculateAllSlabs() {
+                const slabItems = document.querySelectorAll('#slabList .element-item');
+                const results = [];
+                let totalConcrete = 0;
+                let totalMainSteel = 0;
+                let totalDistSteel = 0;
+                
+                // Clear previous results
+                document.getElementById('slabResultsContainer').innerHTML = '';
+                
+                slabItems.forEach((item, index) => {
+                    const id = item.dataset.id;
+                    const name = document.getElementById(`slabName_${id}`).value || `Slab ${index + 1}`;
+                    const length = parseFloat(document.getElementById(`slabLength_${id}`).value) || 5;
+                    const width = parseFloat(document.getElementById(`slabWidth_${id}`).value) || 4;
+                    const thickness = parseFloat(document.getElementById(`slabThickness_${id}`).value) || 0.125;
+                    
+                    const concreteGrade = document.getElementById(`slabConcreteGrade_${id}`).value;
+                    const steelGrade = document.getElementById(`slabSteelGrade_${id}`).value;
+                    
+                    const mainDia = parseInt(document.getElementById(`slabMainDia_${id}`).value) || 10;
+                    const mainSpacing = parseInt(document.getElementById(`slabMainSpacing_${id}`).value) || 150;
+                    const mainCurtailment = document.getElementById(`slabMainCurtailment_${id}`).checked;
+                    
+                    const distDia = parseInt(document.getElementById(`slabDistDia_${id}`).value) || 10;
+                    const distSpacing = parseInt(document.getElementById(`slabDistSpacing_${id}`).value) || 150;
+                    
+                    const devLength = parseInt(document.getElementById(`slabDevLength_${id}`).value) || 500;
+                    const lapLength = parseInt(document.getElementById(`slabLapLength_${id}`).value) || 600;
+                    
+                    // Concrete volume
+                    const concreteVol = length * width * thickness;
+                    totalConcrete += concreteVol;
+                    
+                    // Main bars (along length)
+                    const mainBars = Math.ceil(width / (mainSpacing / 1000)) + 1;
+                    let mainBarLength = length + (devLength / 1000); // Adding development length
+                    if (mainCurtailment) mainBarLength *= 1.15; // Add 15% for curtailment/bend-up
+                    const mainSteelVol = mainBars * Math.PI * Math.pow(mainDia/2000, 2) * mainBarLength;
+                    const mainSteelWeight = mainSteelVol * steelDensity;
+                    totalMainSteel += mainSteelWeight;
+                    
+                    // Distribution bars (along width)
+                    const distBars = Math.ceil(length / (distSpacing / 1000)) + 1;
+                    const distBarLength = width + (devLength / 1000); // Adding development length
+                    const distSteelVol = distBars * Math.PI * Math.pow(distDia/2000, 2) * distBarLength;
+                    const distSteelWeight = distSteelVol * steelDensity;
+                    totalDistSteel += distSteelWeight;
+                    
+                    // Create result card
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card animated';
+                    resultCard.style.animationDelay = `${index * 0.1}s`;
+                    resultCard.innerHTML = `
+                        <div class="result-title">
+                            <span>${name}</span>
+                        </div>
+                        <div class="result-title">
+                            <span>Concrete Volume</span>
+                            <span class="result-value">${math.round(concreteVol, 3)} m³ (${convertForDisplay(concreteVol, false)})</span>
+                        </div>
+                        <div class="result-details">
+                            Size: <strong>${math.round(length, 2)}m (${convertForDisplay(length)}) × ${math.round(width, 2)}m (${convertForDisplay(width)}) × ${math.round(thickness, 3)}m (${convertForDisplay(thickness*1000)})</strong> | 
+                            Grade: <strong>${concreteGrade}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Main Reinforcement</span>
+                            <span class="result-value">${math.round(mainSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${mainBars}</strong> bars of <strong>${mainDia}mm (${convertForDisplay(mainDia)})</strong> @ <strong>${mainSpacing}mm (${convertForDisplay(mainSpacing)})</strong> c/c | 
+                            Grade: <strong>${steelGrade}</strong>
+                        </div>
+                        <div class="result-details">
+                            Curtailment/Bend-up: <strong>${mainCurtailment ? 'Provided' : 'Not provided'}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Distribution Reinforcement</span>
+                            <span class="result-value">${math.round(distSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${distBars}</strong> bars of <strong>${distDia}mm (${convertForDisplay(distDia)})</strong> @ <strong>${distSpacing}mm (${convertForDisplay(distSpacing)})</strong> c/c
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Development & Lap Lengths</span>
+                        </div>
+                        <div class="result-details">
+                            Development Length: <strong>${devLength}mm (${convertForDisplay(devLength)})</strong> | 
+                            Lap Length: <strong>${lapLength}mm (${convertForDisplay(lapLength)})</strong>
+                        </div>
+                    `;
+                    
+                    document.getElementById('slabResultsContainer').appendChild(resultCard);
+                    
+                    results.push({
+                        concreteVol,
+                        mainSteelWeight,
+                        distSteelWeight,
+                        concreteGrade
+                    });
+                });
+                
+                return {
+                    items: results,
+                    totalConcrete,
+                    totalMainSteel,
+                    totalDistSteel
+                };
+            }
+            
+            // Calculate all beams
+            function calculateAllBeams() {
+                const beamItems = document.querySelectorAll('#beamList .element-item');
+                const results = [];
+                let totalConcrete = 0;
+                let totalTopSteel = 0;
+                let totalBottomSteel = 0;
+                let totalStirrupSteel = 0;
+                
+                // Clear previous results
+                document.getElementById('beamResultsContainer').innerHTML = '';
+                
+                beamItems.forEach((item, index) => {
+                    const id = item.dataset.id;
+                    const name = document.getElementById(`beamName_${id}`).value || `Beam ${index + 1}`;
+                    const length = parseFloat(document.getElementById(`beamLength_${id}`).value) || 5;
+                    const width = parseInt(document.getElementById(`beamWidth_${id}`).value) || 230;
+                    const depth = parseInt(document.getElementById(`beamDepth_${id}`).value) || 450;
+                    
+                    const concreteGrade = document.getElementById(`beamConcreteGrade_${id}`).value;
+                    const steelGrade = document.getElementById(`beamSteelGrade_${id}`).value;
+                    
+                    const topBars = parseInt(document.getElementById(`beamTopBars_${id}`).value) || 3;
+                    const topDia = parseInt(document.getElementById(`beamTopDia_${id}`).value) || 12;
+                    const topCurtailment = document.getElementById(`beamTopCurtailment_${id}`).checked;
+                    
+                    const bottomBars = parseInt(document.getElementById(`beamBottomBars_${id}`).value) || 3;
+                    const bottomDia = parseInt(document.getElementById(`beamBottomDia_${id}`).value) || 16;
+                    const bottomBendUp = document.getElementById(`beamBottomBendUp_${id}`).checked;
+                    
+                    const stirrupDia = parseInt(document.getElementById(`beamStirrupDia_${id}`).value) || 8;
+                    const stirrupSpacingA = parseInt(document.getElementById(`beamStirrupSpacingA_${id}`).value) || 100;
+                    const stirrupSpacingB = parseInt(document.getElementById(`beamStirrupSpacingB_${id}`).value) || 150;
+                    
+                    const devLength = parseInt(document.getElementById(`beamDevLength_${id}`).value) || 600;
+                    const lapLength = parseInt(document.getElementById(`beamLapLength_${id}`).value) || 750;
+                    
+                    // Concrete volume
+                    const concreteVol = length * (width/1000) * (depth/1000);
+                    totalConcrete += concreteVol;
+                    
+                    // Top steel
+                    let topBarLength = length + (devLength / 1000); // Adding development length
+                    if (topCurtailment) topBarLength *= 1.2; // Add 20% for curtailment
+                    const topSteelVol = topBars * Math.PI * Math.pow(topDia/2000, 2) * topBarLength;
+                    const topSteelWeight = topSteelVol * steelDensity;
+                    totalTopSteel += topSteelWeight;
+                    
+                    // Bottom steel
+                    let bottomBarLength = length + (devLength / 1000); // Adding development length
+                    if (bottomBendUp) bottomBarLength *= 1.15; // Add 15% for bend-up
+                    const bottomSteelVol = bottomBars * Math.PI * Math.pow(bottomDia/2000, 2) * bottomBarLength;
+                    const bottomSteelWeight = bottomSteelVol * steelDensity;
+                    totalBottomSteel += bottomSteelWeight;
+                    
+                    // Stirrups
+                    const stirrupPerimeter = 2 * ((width/1000) + (depth/1000) - 0.08); // 0.04m cover on each side
+                    const stirrupCountA = Math.ceil((length * 0.25) / (stirrupSpacingA / 1000)) * 2; // 25% at each end
+                    const stirrupCountB = Math.ceil((length * 0.5) / (stirrupSpacingB / 1000)); // 50% in middle
+                    const stirrupVol = (stirrupCountA + stirrupCountB) * Math.PI * Math.pow(stirrupDia/2000, 2) * stirrupPerimeter;
+                    const stirrupWeight = stirrupVol * steelDensity;
+                    totalStirrupSteel += stirrupWeight;
+                    
+                    // Create result card
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card animated';
+                    resultCard.style.animationDelay = `${index * 0.1}s`;
+                    resultCard.innerHTML = `
+                        <div class="result-title">
+                            <span>${name}</span>
+                        </div>
+                        <div class="result-title">
+                            <span>Concrete Volume</span>
+                            <span class="result-value">${math.round(concreteVol, 3)} m³ (${convertForDisplay(concreteVol, false)})</span>
+                        </div>
+                        <div class="result-details">
+                            Size: <strong>${width}mm (${convertForDisplay(width)}) × ${depth}mm (${convertForDisplay(depth)}) × ${math.round(length, 2)}m (${convertForDisplay(length)})</strong> | 
+                            Grade: <strong>${concreteGrade}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Top Reinforcement</span>
+                            <span class="result-value">${math.round(topSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${topBars}</strong> nos of <strong>${topDia}mm (${convertForDisplay(topDia)})</strong> bars | 
+                            Grade: <strong>${steelGrade}</strong>
+                        </div>
+                        <div class="result-details">
+                            Curtailment: <strong>${topCurtailment ? 'Provided' : 'Not provided'}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Bottom Reinforcement</span>
+                            <span class="result-value">${math.round(bottomSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${bottomBars}</strong> nos of <strong>${bottomDia}mm (${convertForDisplay(bottomDia)})</strong> bars
+                        </div>
+                        <div class="result-details">
+                            Bend-up: <strong>${bottomBendUp ? 'Provided' : 'Not provided'}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Stirrups</span>
+                            <span class="result-value">${math.round(stirrupWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${stirrupDia}mm (${convertForDisplay(stirrupDia)})</strong> @ 
+                            <strong>${stirrupSpacingA}mm (${convertForDisplay(stirrupSpacingA)})</strong> (Zone A) & 
+                            <strong>${stirrupSpacingB}mm (${convertForDisplay(stirrupSpacingB)})</strong> (Zone B) c/c
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Development & Lap Lengths</span>
+                        </div>
+                        <div class="result-details">
+                            Development Length: <strong>${devLength}mm (${convertForDisplay(devLength)})</strong> | 
+                            Lap Length: <strong>${lapLength}mm (${convertForDisplay(lapLength)})</strong>
+                        </div>
+                    `;
+                    
+                    document.getElementById('beamResultsContainer').appendChild(resultCard);
+                    
+                    results.push({
+                        concreteVol,
+                        topSteelWeight,
+                        bottomSteelWeight,
+                        stirrupWeight,
+                        concreteGrade
+                    });
+                });
+                
+                return {
+                    items: results,
+                    totalConcrete,
+                    totalTopSteel,
+                    totalBottomSteel,
+                    totalStirrupSteel
+                };
+            }
+            
+            // Calculate all columns
+            function calculateAllColumns() {
+                const columnItems = document.querySelectorAll('#columnList .element-item');
+                const results = [];
+                let totalConcrete = 0;
+                let totalMainSteel = 0;
+                let totalTieSteel = 0;
+                
+                // Clear previous results
+                document.getElementById('columnResultsContainer').innerHTML = '';
+                
+                columnItems.forEach((item, index) => {
+                    const id = item.dataset.id;
+                    const name = document.getElementById(`columnName_${id}`).value || `Column ${index + 1}`;
+                    const floorHeight = parseFloat(document.getElementById(`columnFloorHeight_${id}`).value) || 3;
+                    const width = parseInt(document.getElementById(`columnWidth_${id}`).value) || 300;
+                    const depth = parseInt(document.getElementById(`columnDepth_${id}`).value) || 300;
+                    
+                    const concreteGrade = document.getElementById(`columnConcreteGrade_${id}`).value;
+                    const steelGrade = document.getElementById(`columnSteelGrade_${id}`).value;
+                    
+                    const bars = parseInt(document.getElementById(`columnBars_${id}`).value) || 8;
+                    const barDia = parseInt(document.getElementById(`columnBarDia_${id}`).value) || 12;
+                    
+                    const tieDia = parseInt(document.getElementById(`columnTieDia_${id}`).value) || 8;
+                    const tieSpacingA = parseInt(document.getElementById(`columnTieSpacingA_${id}`).value) || 100;
+                    const tieSpacingB = parseInt(document.getElementById(`columnTieSpacingB_${id}`).value) || 150;
+                    
+                    const devLength = parseInt(document.getElementById(`columnDevLength_${id}`).value) || 700;
+                    const lapLength = parseInt(document.getElementById(`columnLapLength_${id}`).value) || 850;
+                    
+                    // Concrete volume
+                    const concreteVol = floorHeight * (width/1000) * (depth/1000);
+                    totalConcrete += concreteVol;
+                    
+                    // Main bars
+                    const barLength = floorHeight + (devLength / 1000); // Adding development length
+                    const mainSteelVol = bars * Math.PI * Math.pow(barDia/2000, 2) * barLength;
+                    const mainSteelWeight = mainSteelVol * steelDensity;
+                    totalMainSteel += mainSteelWeight;
+                    
+                    // Ties (assuming 1m zone A at bottom and top, rest zone B)
+                    const zoneAHeight = 1; // First and last 1m
+                    const zoneBHeight = Math.max(0, floorHeight - 2);
+                    
+                    const tiesZoneA = Math.ceil(zoneAHeight / (tieSpacingA / 1000)) * 2; // Top and bottom
+                    const tiesZoneB = Math.ceil(zoneBHeight / (tieSpacingB / 1000));
+                    const totalTies = tiesZoneA + tiesZoneB;
+                    
+                    const tiePerimeter = 2 * ((width/1000) + (depth/1000) - 0.08); // 0.04m cover on each side
+                    const tieVol = totalTies * Math.PI * Math.pow(tieDia/2000, 2) * tiePerimeter;
+                    const tieWeight = tieVol * steelDensity;
+                    totalTieSteel += tieWeight;
+                    
+                    // Create result card
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card animated';
+                    resultCard.style.animationDelay = `${index * 0.1}s`;
+                    resultCard.innerHTML = `
+                        <div class="result-title">
+                            <span>${name}</span>
+                        </div>
+                        <div class="result-title">
+                            <span>Concrete Volume</span>
+                            <span class="result-value">${math.round(concreteVol, 3)} m³ (${convertForDisplay(concreteVol, false)})</span>
+                        </div>
+                        <div class="result-details">
+                            Size: <strong>${width}mm (${convertForDisplay(width)}) × ${depth}mm (${convertForDisplay(depth)}) × ${math.round(floorHeight, 2)}m (${convertForDisplay(floorHeight)})</strong> | 
+                            Grade: <strong>${concreteGrade}</strong>
+                        </div>
+                        <div class="result-details">
+                            Floor to Floor Height: <strong>${math.round(floorHeight, 2)}m (${convertForDisplay(floorHeight)})</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Main Reinforcement</span>
+                            <span class="result-value">${math.round(mainSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${bars}</strong> nos of <strong>${barDia}mm (${convertForDisplay(barDia)})</strong> bars | 
+                            Grade: <strong>${steelGrade}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Ties</span>
+                            <span class="result-value">${math.round(tieWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${tieDia}mm (${convertForDisplay(tieDia)})</strong> @ 
+                            <strong>${tieSpacingA}mm (${convertForDisplay(tieSpacingA)})</strong> (Zone A) & 
+                            <strong>${tieSpacingB}mm (${convertForDisplay(tieSpacingB)})</strong> (Zone B) c/c
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Development & Lap Lengths</span>
+                        </div>
+                        <div class="result-details">
+                            Development Length: <strong>${devLength}mm (${convertForDisplay(devLength)})</strong> | 
+                            Lap Length: <strong>${lapLength}mm (${convertForDisplay(lapLength)})</strong>
+                        </div>
+                    `;
+                    
+                    document.getElementById('columnResultsContainer').appendChild(resultCard);
+                    
+                    results.push({
+                        concreteVol,
+                        mainSteelWeight,
+                        tieWeight,
+                        concreteGrade
+                    });
+                });
+                
+                return {
+                    items: results,
+                    totalConcrete,
+                    totalMainSteel,
+                    totalTieSteel
+                };
+            }
+            
+            // Calculate all footings
+            function calculateAllFootings() {
+                const footingItems = document.querySelectorAll('#footingList .element-item');
+                const results = [];
+                let totalConcrete = 0;
+                let totalTopSteel = 0;
+                let totalBottomSteel = 0;
+                
+                // Clear previous results
+                document.getElementById('footingResultsContainer').innerHTML = '';
+                
+                footingItems.forEach((item, index) => {
+                    const id = item.dataset.id;
+                    const name = document.getElementById(`footingName_${id}`).value || `Footing ${index + 1}`;
+                    const length = parseFloat(document.getElementById(`footingLength_${id}`).value) || 1.5;
+                    const width = parseFloat(document.getElementById(`footingWidth_${id}`).value) || 1.5;
+                    const thickness = parseFloat(document.getElementById(`footingThickness_${id}`).value) || 0.3;
+                    const depth = parseFloat(document.getElementById(`footingDepth_${id}`).value) || 1.5;
+                    
+                    const concreteGrade = document.getElementById(`footingConcreteGrade_${id}`).value;
+                    const steelGrade = document.getElementById(`footingSteelGrade_${id}`).value;
+                    
+                    const topDia = parseInt(document.getElementById(`footingTopDia_${id}`).value) || 10;
+                    const topSpacing = parseInt(document.getElementById(`footingTopSpacing_${id}`).value) || 150;
+                    
+                    const bottomDia = parseInt(document.getElementById(`footingBottomDia_${id}`).value) || 10;
+                    const bottomSpacing = parseInt(document.getElementById(`footingBottomSpacing_${id}`).value) || 150;
+                    
+                    const devLength = parseInt(document.getElementById(`footingDevLength_${id}`).value) || 500;
+                    const lapLength = parseInt(document.getElementById(`footingLapLength_${id}`).value) || 600;
+                    
+                    // Concrete volume
+                    const concreteVol = length * width * thickness;
+                    totalConcrete += concreteVol;
+                    
+                    // Top bars (both directions)
+                    const topBarsX = Math.ceil(width / (topSpacing / 1000)) + 1;
+                    const topBarLengthX = length + (devLength / 1000); // Adding development length
+                    
+                    const topBarsY = Math.ceil(length / (topSpacing / 1000)) + 1;
+                    const topBarLengthY = width + (devLength / 1000); // Adding development length
+                    
+                    const topSteelVol = (topBarsX * Math.PI * Math.pow(topDia/2000, 2) * topBarLengthX) + 
+                                       (topBarsY * Math.PI * Math.pow(topDia/2000, 2) * topBarLengthY);
+                    const topSteelWeight = topSteelVol * steelDensity;
+                    totalTopSteel += topSteelWeight;
+                    
+                    // Bottom bars (both directions)
+                    const bottomBarsX = Math.ceil(width / (bottomSpacing / 1000)) + 1;
+                    const bottomBarLengthX = length + (devLength / 1000); // Adding development length
+                    
+                    const bottomBarsY = Math.ceil(length / (bottomSpacing / 1000)) + 1;
+                    const bottomBarLengthY = width + (devLength / 1000); // Adding development length
+                    
+                    const bottomSteelVol = (bottomBarsX * Math.PI * Math.pow(bottomDia/2000, 2) * bottomBarLengthX) + 
+                                          (bottomBarsY * Math.PI * Math.pow(bottomDia/2000, 2) * bottomBarLengthY);
+                    const bottomSteelWeight = bottomSteelVol * steelDensity;
+                    totalBottomSteel += bottomSteelWeight;
+                    
+                    // Create result card
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card animated';
+                    resultCard.style.animationDelay = `${index * 0.1}s`;
+                    resultCard.innerHTML = `
+                        <div class="result-title">
+                            <span>${name}</span>
+                        </div>
+                        <div class="result-title">
+                            <span>Concrete Volume</span>
+                            <span class="result-value">${math.round(concreteVol, 3)} m³ (${convertForDisplay(concreteVol, false)})</span>
+                        </div>
+                        <div class="result-details">
+                            Size: <strong>${math.round(length, 2)}m (${convertForDisplay(length)}) × ${math.round(width, 2)}m (${convertForDisplay(width)}) × ${math.round(thickness, 2)}m (${convertForDisplay(thickness*1000)})</strong> | 
+                            Grade: <strong>${concreteGrade}</strong>
+                        </div>
+                        <div class="result-details">
+                            Depth Below GL: <strong>${math.round(depth, 2)}m (${convertForDisplay(depth)})</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Top Reinforcement</span>
+                            <span class="result-value">${math.round(topSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${topDia}mm (${convertForDisplay(topDia)})</strong> @ <strong>${topSpacing}mm (${convertForDisplay(topSpacing)})</strong> c/c both ways | 
+                            Grade: <strong>${steelGrade}</strong>
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Bottom Reinforcement</span>
+                            <span class="result-value">${math.round(bottomSteelWeight, 2)} kg</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${bottomDia}mm (${convertForDisplay(bottomDia)})</strong> @ <strong>${bottomSpacing}mm (${convertForDisplay(bottomSpacing)})</strong> c/c both ways
+                        </div>
+                        
+                        <div class="result-title" style="margin-top: 15px;">
+                            <span>Development & Lap Lengths</span>
+                        </div>
+                        <div class="result-details">
+                            Development Length: <strong>${devLength}mm (${convertForDisplay(devLength)})</strong> | 
+                            Lap Length: <strong>${lapLength}mm (${convertForDisplay(lapLength)})</strong>
+                        </div>
+                    `;
+                    
+                    document.getElementById('footingResultsContainer').appendChild(resultCard);
+                    
+                    results.push({
+                        concreteVol,
+                        topSteelWeight,
+                        bottomSteelWeight,
+                        concreteGrade
+                    });
+                });
+                
+                return {
+                    items: results,
+                    totalConcrete,
+                    totalTopSteel,
+                    totalBottomSteel
+                };
+            }
+            
+            // Calculate summary and costs
+            function calculateSummary(slabResults, beamResults, columnResults, footingResults) {
+                // Get material rates
+                const cementRate = parseFloat(document.getElementById('cementRate').value) || 400;
+                const sandRate = parseFloat(document.getElementById('sandRate').value) || 800;
+                const aggregateRate = parseFloat(document.getElementById('aggregateRate').value) || 1000;
+                const steelRate = parseFloat(document.getElementById('steelRate').value) || 70;
+                
+                // Total concrete volume
+                const totalConcrete = slabResults.totalConcrete + beamResults.totalConcrete + 
+                                     columnResults.totalConcrete + footingResults.totalConcrete;
+                
+                // Total steel weight
+                const totalSteel = slabResults.totalMainSteel + slabResults.totalDistSteel + 
+                                  beamResults.totalTopSteel + beamResults.totalBottomSteel + beamResults.totalStirrupSteel + 
+                                  columnResults.totalMainSteel + columnResults.totalTieSteel + 
+                                  footingResults.totalTopSteel + footingResults.totalBottomSteel;
+                
+                // Update summary values
+                document.getElementById('totalConcreteVol').textContent = `${math.round(totalConcrete, 3)} m³ (${convertForDisplay(totalConcrete, false)})`;
+                document.getElementById('totalSteelWeight').textContent = `${math.round(totalSteel, 2)} kg`;
+                
+                // Calculate material quantities and costs
+                // Concrete mix proportions (1:1.5:3 for M20)
+                const cementPerM3 = 7.5; // bags per m³
+                const sandPerM3 = 0.5; // m³ per m³ concrete
+                const aggregatePerM3 = 1; // m³ per m³ concrete
+                
+                const totalCement = totalConcrete * cementPerM3;
+                const totalSand = totalConcrete * sandPerM3;
+                const totalAggregate = totalConcrete * aggregatePerM3;
+                
+                const cementCost = totalCement * cementRate;
+                const sandCost = totalSand * sandRate;
+                const aggregateCost = totalAggregate * aggregateRate;
+                const steelCost = totalSteel * steelRate;
+                
+                const totalCost = cementCost + sandCost + aggregateCost + steelCost;
+                
+                // Update cost breakdown table
+                const costBreakdown = document.getElementById('costBreakdown');
+                costBreakdown.innerHTML = `
+                    <tr>
+                        <td>Cement</td>
+                        <td>${math.round(totalCement, 1)} bags</td>
+                        <td>₹${cementRate}</td>
+                        <td>₹${math.round(cementCost, 2)}</td>
+                    </tr>
+                    <tr>
+                        <td>Sand</td>
+                        <td>${math.round(totalSand, 2)} m³</td>
+                        <td>₹${sandRate}</td>
+                        <td>₹${math.round(sandCost, 2)}</td>
+                    </tr>
+                    <tr>
+                        <td>Aggregate</td>
+                        <td>${math.round(totalAggregate, 2)} m³</td>
+                        <td>₹${aggregateRate}</td>
+                        <td>₹${math.round(aggregateCost, 2)}</td>
+                    </tr>
+                    <tr>
+                        <td>Steel</td>
+                        <td>${math.round(totalSteel, 2)} kg</td>
+                        <td>₹${steelRate}</td>
+                        <td>₹${math.round(steelCost, 2)}</td>
+                    </tr>
+                `;
+                
+                // Update total cost
+                document.getElementById('totalCost').textContent = `₹${math.round(totalCost, 2)}`;
+                document.getElementById('projectTotal').textContent = `₹${math.round(totalCost, 2)}`;
+            }
+            
+            // Reset all values
+            function resetAll() {
+                if (confirm('Are you sure you want to reset all values to default?')) {
+                    // Reset slab elements
+                    document.getElementById('slabList').innerHTML = '';
+                    slabCount = 0;
+                    addSlabElement();
+                    
+                    // Reset beam elements
+                    document.getElementById('beamList').innerHTML = '';
+                    beamCount = 0;
+                    addBeamElement();
+                    
+                    // Reset column elements
+                    document.getElementById('columnList').innerHTML = '';
+                    columnCount = 0;
+                    addColumnElement();
+                    
+                    // Reset footing elements
+                    document.getElementById('footingList').innerHTML = '';
+                    footingCount = 0;
+                    addFootingElement();
+                    
+                    // Reset material rates
+                    document.getElementById('cementRate').value = 400;
+                    document.getElementById('sandRate').value = 800;
+                    document.getElementById('aggregateRate').value = 1000;
+                    document.getElementById('steelRate').value = 70;
+                    
+                    // Clear results
+                    document.getElementById('slabResultsContainer').innerHTML = '';
+                    document.getElementById('beamResultsContainer').innerHTML = '';
+                    document.getElementById('columnResultsContainer').innerHTML = '';
+                    document.getElementById('footingResultsContainer').innerHTML = '';
+                    document.getElementById('totalConcreteVol').textContent = '0 m³';
+                    document.getElementById('totalSteelWeight').textContent = '0 kg';
+                    document.getElementById('costBreakdown').innerHTML = '';
+                    document.getElementById('totalCost').textContent = '₹0';
+                    document.getElementById('projectTotal').textContent = '₹0';
+                }
+            }
+            
+            // Print estimate
+            function printEstimate() {
+                // First calculate all to ensure data is up to date
+                calculateAll();
+                
+                // Switch to summary tab for printing
+                tabBtns.forEach(b => b.classList.remove('active'));
+                document.querySelector('.tab-btn[data-tab="summary"]').classList.add('active');
+                
+                tabContents.forEach(c => c.classList.remove('active'));
+                document.getElementById('summary-tab').classList.add('active');
+                document.getElementById('summary-results').classList.add('active');
+                
+                // Wait a moment for the UI to update
+                setTimeout(() => {
+                    window.print();
+                }, 500);
+            }
+            
+            // Download as PDF
+            function downloadAsPdf() {
+                // First calculate all to ensure data is up to date
+                calculateAll();
+                
+                // Create a new jsPDF instance
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add logo and title
+                doc.setFontSize(20);
+                doc.setTextColor(40, 40, 40);
+                doc.text('Kajal Construction', 105, 20, { align: 'center' });
+                doc.setFontSize(14);
+                doc.text('Structural Estimation Report', 105, 30, { align: 'center' });
+                
+                // Add date
+                const today = new Date();
+                doc.setFontSize(10);
+                doc.text(`Generated: ${today.toLocaleDateString()}`, 105, 40, { align: 'center' });
+                
+                // Add a line
+                doc.setDrawColor(192, 160, 98);
+                doc.setLineWidth(0.5);
+                doc.line(20, 45, 190, 45);
+                
+                // Add content from each section
+                let yPos = 55;
+                
+                // Slab results
+                const slabResults = document.getElementById('slabResultsContainer').innerText;
+                doc.setFontSize(14);
+                doc.setTextColor(10, 10, 42);
+                doc.text('Slab Estimation', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const slabLines = doc.splitTextToSize(slabResults, 170);
+                doc.text(slabLines, 20, yPos);
+                yPos += (slabLines.length * 6) + 15;
+                
+                // Beam results
+                const beamResults = document.getElementById('beamResultsContainer').innerText;
+                doc.setFontSize(14);
+                doc.setTextColor(10, 10, 42);
+                doc.text('Beam Estimation', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const beamLines = doc.splitTextToSize(beamResults, 170);
+                doc.text(beamLines, 20, yPos);
+                yPos += (beamLines.length * 6) + 15;
+                
+                // Column results
+                const columnResults = document.getElementById('columnResultsContainer').innerText;
+                doc.setFontSize(14);
+                doc.setTextColor(10, 10, 42);
+                doc.text('Column Estimation', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const columnLines = doc.splitTextToSize(columnResults, 170);
+                doc.text(columnLines, 20, yPos);
+                yPos += (columnLines.length * 6) + 15;
+                
+                // Footing results
+                const footingResults = document.getElementById('footingResultsContainer').innerText;
+                doc.setFontSize(14);
+                doc.setTextColor(10, 10, 42);
+                doc.text('Footing Estimation', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const footingLines = doc.splitTextToSize(footingResults, 170);
+                doc.text(footingLines, 20, yPos);
+                yPos += (footingLines.length * 6) + 15;
+                
+                // Summary
+                const summaryResults = document.getElementById('summary-results').innerText;
+                doc.setFontSize(14);
+                doc.setTextColor(10, 10, 42);
+                doc.text('Cost Summary', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const summaryLines = doc.splitTextToSize(summaryResults, 170);
+                doc.text(summaryLines, 20, yPos);
+                
+                // Save the PDF
+                doc.save('Kajal-Construction-Estimate.pdf');
+            }
+            
+            // Download as Excel
+            function downloadAsExcel() {
+                // First calculate all to ensure data is up to date
+                calculateAll();
+                
+                // Create a new workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Prepare data for each sheet
+                const sheets = [
+                    { name: 'Slabs', id: 'slabResultsContainer' },
+                    { name: 'Beams', id: 'beamResultsContainer' },
+                    { name: 'Columns', id: 'columnResultsContainer' },
+                    { name: 'Footings', id: 'footingResultsContainer' },
+                    { name: 'Summary', id: 'summary-results' }
+                ];
+                
+                // Add each sheet to the workbook
+                sheets.forEach(sheet => {
+                    const element = document.getElementById(sheet.id);
+                    const data = XLSX.utils.table_to_sheet(element);
+                    XLSX.utils.book_append_sheet(wb, data, sheet.name);
+                });
+                
+                // Generate the Excel file and download it
+                XLSX.writeFile(wb, 'Kajal-Construction-Estimate.xlsx');
+            }
+        });
+    </script>
+</body>
+</html>
